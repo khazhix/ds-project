@@ -20,3 +20,15 @@ List of links:
 [Discussion 1](http://codeforces.com/blog/entry/19193)
 
 [Discussion 2](http://codeforces.com/blog/entry/13959)
+
+## Problemset
+
+(https://www.e-olymp.com/en/problems/2468)
+
+(https://www.spoj.com/problems/NUMOFPAL/)
+
+(https://www.spoj.com/problems/IITKWPCE/)
+
+[Problemset from timus on palindromes](http://acm.timus.ru/problemset.aspx?space=1&tag=palindromes)
+
+(https://informatics.mccme.ru//mod/statements/view.php?chapterid=1750)
