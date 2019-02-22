@@ -1,7 +1,7 @@
 PACKAGE=acmart
 
 DOCS = \
-	plan.tex \
+	proposal.tex \
 
 
 PDF = ${DOCS:%.tex=%.pdf}
@@ -15,6 +15,8 @@ all:  ${PDF}
 	pdflatex $<
 	while ( grep -q '^LaTeX Warning: Label(s) may have changed' $*.log) \
 	do pdflatex $<; done
+
+proposal.pdf: proposal-body.tex
 
 clean:
 	$(RM) *.log *.aux \
