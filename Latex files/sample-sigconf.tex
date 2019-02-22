@@ -2,6 +2,7 @@
 % The first command in your LaTeX source must be the \documentclass command.
 \documentclass[sigconf]{acmart}
 \usepackage{amsmath}
+\usepackage{indentfirst}
 
     
 %
@@ -47,37 +48,27 @@ This document represents a Data Science project proposal. It contains descriptio
 For this course EERTREE was chosen. EERTREE or palindromic tree is an efficient data structure for processing palindromes in strings. During this course I will be working on analysis and research on this data structure especially from functional programming paradigm point of view.
 
 \section{Work Plan}
-\par
 \textbf{Iteration I. 11.02 - 25.02}\\
-Analyze palindromic tree and similar solutions, algorithms and data structures. Compare them and find pros and cons.\\
+Analyze palindromic tree and similar solutions, algorithms and data structures. Find problems it solves. Define set of interesting operations over palindromic tree.\\
 
 \textbf{Iteration II. 25.02 - 11.03}\\
-Come up with compromise solution (or many solutions). Start of  implementation. \\
+Propose functional (persistent) version of palindromic tree. Analyze theoretical complexity (worst case and amortized) and compare it with original solution.\\
 
 \textbf{Iteration III. 11.03 - 25.03}\\
-Implement known solution and complete own solution. Compare them: show results for different use cases (asymptotically and/or real time/memory usage, theoretical assurance via prover).   \\
+Implement functional and original version. Compare them: show results for different use cases (benchmarks, real time/memory usage).\\
 
 \textbf{Iteration IV. 25.03 - 08.04}\\
 Working with one or more of the options:
 \begin{itemize} 
-\item Partial or full persistence
-\item Real-time performance
 \item Stream fusion implementation
 \item Cache oblivious model optimization
-\item Modify/extend features
+\item Linked and Array (vector) based implementation comparison
 \end{itemize} 
-\hfill
+\ 
 
 \textbf{Iteration V. 08.04 - 22.04} \\
-Working with one or more of the options:
-\begin{itemize} 
-\item Partial or full persistence
-\item Real-time performance
-\item Stream fusion implementation
-\item Cache oblivious model optimization
-\item Modify/extend features
-\end{itemize}
-\hfill \break
+Implement convenient interface, generalization.
+\\ \par
 \textbf{Iteration VI. 22.04 - 06.05} \\
-Finalization of project: writing tests, formal proving, refactoring. Sum up results.
+Finalization of project: writing tests, documentation, formal proving, refactoring. Cabal contribution. Sum up results.
 \end{document}
