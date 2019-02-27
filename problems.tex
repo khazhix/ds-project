@@ -13,7 +13,7 @@
 \usepackage{amssymb}
 \newcommand*{\Z}{\mathbb{Z}}
 
-\title{Problems on eertree}
+\title{List of problems for eertree}
 \author{Timur Khazhiev (\href{mailto:t.khazhiev@innopolis.ru}{t.khazhiev@innopolis.ru})}
 
 \definecolor{mygreen}{rgb}{0,0.6,0}
@@ -95,8 +95,22 @@ aba           & 4              \\ \hline
 \end{table}
 \href{https://informatics.mccme.ru//mod/statements/view.php?chapterid=1750}{\underline{Link to a problem}}
 \section*{Problem 5}
-For a given DNA sequence we want to find non palindrome of length $n$ between 2 palindromes of length $m$. Can be practical for searching potential hairpins.
+For a given string $s$ we want to find non palindrome of length $n$ between 2 palindromes of length $m$. Can be practical for searching potential hairpins.
+\begin{table}[H]
+\begin{tabular}{|l|l|}
+\hline
+Example input & Example output                                          \\ \hline
+aaabcdaaa     & \begin{tabular}[c]{@{}l@{}}aaa\\ bcd\\ aaa\end{tabular} \\ \hline
+\end{tabular}
+\end{table}
 \section*{Problem 6}
-For a given DNA sequence we want to find mutations that leads to palindromic sequence and probability of these events.
-
+For a given string $s$ we want to find closest palindrome by edit distance.
+\begin{table}[H]
+\begin{tabular}{|l|l|}
+\hline
+Example input & Example output \\ \hline
+abcda         & abcba          \\ \hline
+abab          & ababa          \\ \hline
+\end{tabular}
+\end{table}
 \end{document}
