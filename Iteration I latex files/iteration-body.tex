@@ -47,7 +47,7 @@ To support $prepend(c)$ operation we can add prefix links. Which will not affect
 
 \subsection{$set(i, c)$}
 In the worst case scenario modifying a single character will produce or vice-versa remove $\lvert S \rvert/2$ palindromes.
-Thus $\Omega(min(i, \lvert S \rvert - i))$ is minimal. Naively we can $pop()$ till modified character and rebuild a tree so $O(min(i, \lvert S \rvert - i) \log \sigma)$ (where $\sigma$ is a size of alphabet) is possible. But is it possible to lower this value down to, say, $O(min(i, \lvert S \rvert - i) + \log \sigma)$?
+Thus $\Omega(min(i, \lvert S \rvert - i))$ is minimal. Naively we can $pop()$ till modified character and rebuild a tree so $O(min(i, \lvert S \rvert - i) \cdot \log \sigma)$ (where $\sigma$ is a size of alphabet) is possible. But is it possible to lower this value down to, say, $O(\sigma)$ since edges represent insertion character?
 
 \subsection{$merge(eertree_1, eertree_2)$}
 For merge operation interesting property was found. It might be represented as extension of lemma from original paper.
