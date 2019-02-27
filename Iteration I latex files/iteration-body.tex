@@ -1,0 +1,83 @@
+\section{Problems on palindromes}
+
+There are a lot of problems on palindromes can be found. Most of them are problems for programming contests but also there are practical applications of palindromes in genetics. We collected some problem statements.
+
+\input{problems.tex}
+
+\section{Alternative algorithms and data structures}
+
+In original paper \cite{RUBINCHIK2018249} author referenced several solutions such as affix tree, affix arrays and Manacher's algorithm.
+
+\subsection{Affix tree and affix array}
+
+Affix tree\cite{stoye2000affix} is just a combined suffix tree and reversed prefix tree in one structure. This combination allows us to match pattern from left to right, from right to left and even inside out.
+
+Affix array\cite{strothmann2007affix} is equivalent to the affix tree with respect to
+its functionality, but with smaller memory requirements.
+
+This data structure is used in genetics for searching different patterns in molecular sequences.
+
+\subsection{Manacher's algorithm}
+
+Manacher's algorithm\cite{manacher1975new} has one single application. It is used to find the longest palindromic substring in any string online without any structure behind it.
+
+
+\section{eertree data structure}
+
+Motive problem for this structure is to find and count all
+distinct subpalindromes. Both methods mentioned above can be used for solving this problem but in a complex manner. Eertree is capable of solving this problem in easy manner with same asymptotics. Moreover it was found that eertree has more applications.
+
+This data structure allows to keep track of palindrome substrings (also in an online fashion) in linear time and space. The eertree for a given string is a directed graph with nodes containing palindrome substring of string and two types of edges: insertion edge (weighted edge)
+and maximum palindromic suffix (unweighted).
+
+In the basic version of eertree interface has only one operation $add(c)$ where $c$ is a character added (at the end) to the processed string. Also author proposed version of structure where operation $pop()$ (deletion of last element from structure) is added and joint version for several strings. 
+
+\section{eertree analysis}
+Versions from original paper do not support operation such as 
+
+\begin{description}[align=right,labelwidth=1.5cm]
+\item [prepend] adding character at the beginning of processing string
+\item [set] modifying any character in processing string
+\item [merge] combining two structures in one, in processing strings it will be simple concatenation.
+\end{description}
+
+\subsection{$prepend(c)$}
+In original paper $add(c)$ is a $append(c)$. Since it adds to end of sting, in structure it operates on suffix links. 
+To support $prepend(c)$ operation we can add prefix links. Which will not affect on structure asymptotically. 
+
+\subsection{$set(i, c)$}
+In the worst case scenario modifying a single character will produce or vice-versa remove $\lvert S \rvert/2$ palindromes.
+Thus $\Omega(min(i, \lvert S \rvert - i))$ is minimal. Naively we can $pop()$ till modified character and rebuild a tree so $O(min(i, \lvert S \rvert - i) \log \sigma)$ (where $\sigma$ is a size of alphabet) is possible. But is it possible to lower this value down to, say, $O(min(i, \lvert S \rvert - i) + \log \sigma)$?
+
+\subsection{$merge(eertree_1, eertree_2)$}
+For merge operation interesting property was found. It might be represented as extension of lemma from original paper.
+\begin{lemma}[{\cite[Lemma 1]{RUBINCHIK2018249}}]
+Let S be a string and c be a symbol. The string
+Sc contains at most one subpalindrome which is not a substring of S.  This new palindrome is the longest suffix-palindrome of Sc.
+\end{lemma}
+
+\begin{proposition}
+Let $S_1$ be a first string, $S_2$ be a second string and $\lvert S_1 \rvert$, $\lvert S_2 \rvert$ be the length of first string and second one respectively. The concatenation of both strings $S_1S_2$ contains at most $min(\lvert S_1 \rvert, \lvert S_2 \rvert)$ subpalindromes which are not a substring of $S_1$ nor $S_2$. 
+\end{proposition}
+
+Thus theoretical minimum for merging two structures is $\Omega(min(\lvert S_1 \rvert, \lvert S_2 \rvert))$. Using version with $prepend(c)$ and $append(c)$ it may be possible to merge in $\Theta(min(\lvert S_1 \rvert, \lvert S_2 \rvert) \cdot \log \sigma)$.  Interesting question emerges: is it possible to find merge algorithm with complexity $O(min(\lvert S_1 \rvert, \lvert S_2 \rvert) + \log \sigma)$?
+
+\section{Comparison of approaches}
+% Please add the following required packages to your document preamble:
+% \usepackage{graphicx}
+\begin{table}[H]
+\resizebox{\linewidth}{!}{%
+\begin{tabular}{|l|l|l|l|}
+\hline
+                  & Eertree                                                                                                                       & Affix tree                                      & \begin{tabular}[c]{@{}l@{}}Manacher's\\ algorithm\end{tabular} \\ \hline
+$build(S)$        & $O(\lvert S \rvert \cdot \log \sigma)$                                                                                        & $O(\lvert S \rvert \cdot \log \lvert S \rvert)$ & $O(\lvert S \rvert)$                                           \\ \hline
+$append(c)$       & \begin{tabular}[c]{@{}l@{}}$O(\lvert S \rvert)$\\ $O(\log \lvert S \rvert)$\\ $\Theta(\log \sigma)$ are possible\end{tabular} & $O(\log \lvert S \rvert)$                       & $O(1)$                                                         \\ \hline
+$prepend(c)$      & \begin{tabular}[c]{@{}l@{}}$O(\lvert S \rvert)$\\ $O(\log \lvert S \rvert)$\\ $\Theta(\log \sigma)$ are possible\end{tabular} & $O(\log \lvert S \rvert)$                       & -                                                              \\ \hline
+$pop()$           & $O(1)$                                                                                                                        & -                                               & -                                                              \\ \hline
+$set(i, c)$       & $O(min(i, \lvert S \rvert - i) \cdot \log \sigma)$                                                                            & $O(1)$                                          &  -                                                              \\ \hline
+$merge(S_1, S_2)$ & $\Theta(min(\lvert S_1 \rvert, \lvert S_2 \rvert) \cdot \log \sigma)$                                                         & -                                               & -                                                              \\ \hline
+\end{tabular}%
+}
+\end{table}
+
+Manacher's algorithm does not build something, it just calculates. 
