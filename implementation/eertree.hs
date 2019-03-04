@@ -10,11 +10,6 @@ import Control.Arrow (first, second)
 data Trie a = Trie [a] [(a, Trie a)]
     deriving Show
 
-addPath :: Eq a => [a] -> Trie a -> Trie a
-addPath = _
-
-subpalindromes :: [a] -> [[a]]
-subpalindromes = _
 
 data Eertree a = Eertree 
     { oddTrie :: Trie a,
@@ -31,6 +26,19 @@ empty = Eertree
       maxSuff = [],
       revPref = []
     }
+
+
+addPath :: Eq a => [a] -> Trie a -> Trie a
+addPath (c:[]) (Trie s' path) = Trie s' (path ++ [(c, Trie (c:s' ++ [c]) [])]) 
+addPath (c:s) (Trie s' path) = Trie s' (map (\(c', t') -> if c' == c then (c', addPath s t') else (c', t')) path) 
+
+
+subpalindromes :: Eq a => [a] -> [[a]]
+subpalindromes s = filter (/=[]) (len (eertree s))
+    where
+        len Eertree {..} = trieToList oddTrie ++ trieToList evenTrie
+        trieToList :: Trie a -> [[a]]
+        trieToList (Trie s path) = [s] ++ concat (map (trieToList . snd) path) 
 
 
 candidates :: ([a], [a]) -> [([a], [a])]
@@ -59,8 +67,24 @@ findSuff c t = find g (suffCandidates t)
 add :: Eq a => a -> Eertree a -> Eertree a
 add c t =
     case findSuff c t of
-        Nothing -> t { maxSuff = [c], revPref = maxSuff t ++ revPref t }
-        Just (pref, suff) -> t { maxSuff = c:suff ++ [c], revPref = tail pref } 
+        Nothing -> t {
+                    oddTrie = addPath [c] (oddTrie t),
+                    evenTrie = evenTrie t, 
+                    maxSuff = [c], 
+                    revPref = maxSuff t ++ revPref t 
+                    }
+        Just (pref, suff) -> t { 
+                    oddTrie =
+                        (case (length suff) `mod` 2 of
+                            1 -> addPath (reverse (fst (splitAt ((length (suff) + 1) `div` 2) suff)) ++ [c]) (oddTrie t) 
+                            0 -> oddTrie t),
+                    evenTrie =
+                        (case (length suff) `mod` 2 of
+                            1 -> evenTrie t
+                            0 -> addPath (reverse (fst (splitAt ((length (suff)) `div` 2) suff)) ++ [c]) (evenTrie t)),
+                    maxSuff = c:suff ++ [c], 
+                    revPref = tail pref 
+                    } 
 
 eertree :: Eq a => [a] -> Eertree a
 eertree = foldl (flip add) empty
