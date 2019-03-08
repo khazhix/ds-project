@@ -135,3 +135,14 @@ a216264 =
       binaryStrings n = concat
         [ [0:s, 1:s]
         | s <- binaryStrings (n - 1) ]
+
+merge :: Eq a => Eertree a -> Eertree a -> Eertree a
+merge e1 e2 = foldl (flip add) e1 seq
+    where
+        seq = reverse (revPref e2) ++ (maxSuff e2)
+
+set :: Eq a => Eertree a -> Int -> a -> Eertree a
+set e n c = eertree seq
+    where
+        tmpSeq = reverse (revPref e) ++ (maxSuff e)
+        seq = a ++ (c:b) where (a, (_:b)) = splitAt n tmpSeq
