@@ -32,6 +32,8 @@ empty = Eertree
       revPref = []
     }
 
+-- | n - depth of a trie
+-- | O(n) 
 addPath :: Eq a => [a] -> Trie a -> Trie a
 addPath [] t = t
 addPath [c] t@(Trie s ts)
@@ -43,16 +45,21 @@ addPath (c:cs) (Trie s ts) = Trie s (map g ts)
       | c == c'   = (c', addPath cs t)
       | otherwise = edge
 
+
+-- | n - depth of trie
+-- | O(n ** 2)
 triePalindromes :: (a -> b -> b) -> b -> Trie a -> [b]
 triePalindromes f z (Trie _ ts) = z :
   [ f c p
   | (c, t) <- ts
   , p <- triePalindromes f z t ]
 
+-- | O(1)
 insertCenter :: a -> Palindrome a -> Palindrome a
 insertCenter c (Palindrome l r parity)
   = Palindrome (l ++ [c]) (c : r) parity
 
+-- | O(1) 
 fromPalindrome :: Palindrome a -> [a]
 fromPalindrome (Palindrome l r parity) =
   case parity of
@@ -65,6 +72,7 @@ oddTriePalindromes = triePalindromes insertCenter (Palindrome [] [] Odd)
 evenTriePalindromes :: Trie a -> [Palindrome a]
 evenTriePalindromes = triePalindromes insertCenter (Palindrome [] [] Even)
 
+-- | depths of two tries, filter + O(n)
 subpalindromes :: Eq a => [a] -> [[a]]
 subpalindromes
   = filter (not . null)
@@ -98,7 +106,7 @@ findSuff c t = find g (suffCandidates t)
        g _         = False
 
 
-
+-- | O(n)
 add :: Eq a => a -> Eertree a -> Eertree a
 add c t = addPalindrome (findSuff c t)
   where
@@ -118,6 +126,7 @@ add c t = addPalindrome (findSuff c t)
         halfSuff = drop (length suff `div` 2) suff
         addPalPath = addPath (halfSuff ++ [c])
 
+-- | O(n**2) ?
 eertree :: Eq a => [a] -> Eertree a
 eertree = foldl (flip add) empty
 
@@ -136,11 +145,15 @@ a216264 =
         [ [0:s, 1:s]
         | s <- binaryStrings (n - 1) ]
 
+-- | m - length of string of second eertee, 
+-- | n - depth of first eertree 
+-- | O(m * n)
 merge :: Eq a => Eertree a -> Eertree a -> Eertree a
 merge e1 e2 = foldl (flip add) e1 seq
     where
         seq = reverse (revPref e2) ++ (maxSuff e2)
 
+-- | Same as building a tree of length n 
 set :: Eq a => Eertree a -> Int -> a -> Eertree a
 set e n c = eertree seq
     where
