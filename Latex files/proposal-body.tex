@@ -1,0 +1,79 @@
+\section{Introduction}
+
+A palindrome is a string that reads the same both ways.
+Palindromic patterns appear in many research areas, from
+formal language theory to molecular biology.
+
+There are a lot of papers introducing algorithms and data structures
+to facilitate different problems that involve palindromes.
+One such data structure is EERTREE, a recently described
+linear-sized palindromic tree introduced by Rubinchik \cite{RUBINCHIK2018249}.
+
+In this project we aim to design at least one purely functional and
+fully persistent version of a palindromic tree, implement it
+in Haskell programming language and compare it
+with other existing solutions. We are going to start with
+a naive implementation and gradually arrive at an efficient
+version, relying on some of the techniques described by
+Okasaki \cite{Okasaki1998} for designing purely functional data structures.
+
+We hope that purely functional variations will prove valuable
+for some divide-and-conquer approaches to palindromic analysis.
+We also believe that a fully persistent version might be useful
+for comparative analysis of closely-related strings
+(such as RNA string mutations).
+
+\section{Work Plan}
+
+\subsection{Iteration I (Feb 11 - Feb 25)}
+
+Analyse EERTREE data structure closely.
+Collect common palindrome-related problems.
+Research alternative algorithms and data structures for those problems.
+Investigate existing approaches to palindromic analysis.
+Form a list of important operations on EERTREE
+to compare for time and space complexity.
+
+\subsection{Iteration II (Feb 25 - Mar 11)}
+
+Propose a purely functional, fully persistent palindromic tree.
+Analyse time and space complexities for the most important operations
+(both worst-case and amortized).
+Compare with the original palindromic tree.
+
+\subsection{Iteration III (Mar 11 - Mar 25)}
+
+Implement EERTREE and the purely functional palindromic tree.
+Compare implementations on sample problems.
+Analyse purely functional implementation performance.
+
+\subsection{Iteration IV (Mar 25 - Apr 08)}
+
+Investigate options to improve performance for
+the purely functional palindromic tree.
+Consider these options:
+
+\begin{itemize}
+  \item fusion/deforestation optimisations;
+  \item cache-oblivious model optimizations;
+  \item linked vs. vector-based implementations;
+  \item asymptotic improvements via partial evaluation;
+  \item optimisations for small alphabet strings.
+\end{itemize}
+
+\subsection{Iteration V (Apr 08 - Apr 22)}
+
+Design a generalised interface to the data structure,
+relying on parametric polymorphism and higher-order functions
+to facilitate reusability.
+
+\subsection{Iteration VI (Apr 22 - May 06)}
+
+Finalise the project by creating a Cabal package complete with
+examples, tests, code comments, documentation and, perhaps, a
+formal verification.
+
+\section{Iteration results}
+
+\subsection{Iteration I}
+During iteration I github repository\cite{khazhix} was created where all related to the topic materials were collected. In general this iteration was successful: the analysis of data structure revealed a lack of functionality, interesting problems was found and overview with comparison of similar approaches was made. Detailed results for this iteration can be found in separate pdf file\cite{khazhix1} in github repository.
