@@ -1,5 +1,9 @@
-\section{2 sided tree}
-As the original tree holds only maximum palindrome suffix, we can only append a new symbol. But what if we want to add a new symbol at the beginning? To allow that we can add maximum palindrome prefix support. So we might need to keep track of max prefixes, but as palindrome is symmetric, maximum palindrome suffix of palindrome is maximum palindrome prefix as well. Thus we can simply keep information about maximum palindrome prefix of processed string (as we keep information about maximum suffix). So no major memory usage is added, only one more entry.
+\section{Naive implementation}
+Naive implementation was made as a proof of concept. Process of implementation is pretty straightforward. Structure contains two tries for odd and even palindromes, current maximum palindromic suffix and sequence before that suffix. To add a new symbol to the tree we generate palindromic suffix candidates for input symbol. If symbol before that suffix and input symbol are same, then we found a new palindrome, update max palindromic suffix and add new node to the proper trie. If none of candidates is suitable, symbol simple adds to odd trie after the root. 
+
+To check that it works, we can calculate number of rich palindromes of length $n$ and compare it with actual sequence from OEIS \cite{oeisA216264}. A sequence of length $n$ is called rich if it contains, as subsequences, exactly $n$ distinct palindromes. Also we will use this method of checking further during project.
+\section{Two sided tree}
+As the original tree \cite{RUBINCHIK2018249} holds only maximum palindrome suffix, we can only append a new symbol. But what if we want to add a new symbol at the beginning? To allow that we can add maximum palindrome prefix support. So we might need to keep track of max prefixes, but as palindrome is symmetric, maximum palindrome suffix of palindrome is maximum palindrome prefix as well. Thus we can simply keep information about maximum palindrome prefix of processed string (as we keep information about maximum suffix). So no major memory usage is added, only one more entry.
 
 This extension allows us merge two eertrees more efficient than simple naive approach (adding symbol by symbol from string of eertree$_2$ to eerteee$_1$). Let's consider example: $"abbabba" + "bbbab"$.
 Palindromes of concatenated string includes all processed palindromes of both strings and new ones. It's pretty obvious that new palindromes can be found somewhere around joint of two strings. 
@@ -27,12 +31,25 @@ $"abba\underline{bba}" + "\mathunderline{blue}{\mathunderline{blue}{\mathunderli
 $"abbabb\underline{a}" + "\mathunderline{blue}{\mathunderline{blue}{b}b}\underline{b}ab"$, $"abbb"$ is not a palindrome, moving to next max prefix\\
 $"abbabb\underline{a}" + "\mathunderline{blue}{b}\underline{b}bab"$, $"abb"$ is not a palindrome, stop here\\
 \end{enumerate}
-All found palindromes are added to the a tree. Max palindrome suffix of merged tree is max palindrome suffix of second string. If one of new found palindromes includes whole second string, it becomes max palindrome suffix. And visa-versa max palindrome prefix of merged tree is max palindrome prefix of first string. If one of new found palindromes includes whole first string, it becomes max palindrome prefix. Thus max suffix can be same sequence as max prefix. Nabludenie! Also number of palindromes which includes whole string is exactly one?
-\section{Infinite tree}
-Some problems does not require information about original string as an output, just raw palindromes information. For some alphabet $\sigma$ we can simply generate palindromes of length $n$. The number of palindromes of length $n$ will be $g(n, \sigma)$ where 
-$$g(n, \sigma) = \begin{cases}
-\ \sqrt{\sigma^{n}} \cdot \sigma & n \ is \ odd\\
-\ \sqrt{\sigma^{n}}   & n \ is \ even
-\end{cases}$$
- That tree will represent all possible palindromes and their dependencies. So the number nodes of infinite tree for fixed alphabet will be $\sum_{n=1}^{\infty} g(n, \sigma)$. Here where haskell's lazy evaluation will come in handy. 
+All found palindromes are added to the a tree. Max palindrome suffix of merged tree is max palindrome suffix of second string. If one of new found palindromes includes whole second string, it becomes max palindrome suffix. And visa-versa max palindrome prefix of merged tree is max palindrome prefix of first string. If one of new found palindromes includes whole first string, it becomes max palindrome prefix. Thus max suffix can be same sequence as max prefix. 
 
+Another paper from Rubichik \cite{rubinchik2016number} showed that random word of length $n$ contains, on expectation, $\Theta(\sqrt{n})$ distinct palindromic factors. So if length of first string is $n$ and length of second is $m$, on expectation, their concatenation gives us $\Theta(\sqrt{n + m})$ palindromes. From that we exclude palindromes that already processed separately. Since max palindrome suffix and prefix can be new palindromes from concatenation we can update them both at $O(\sqrt{n + m})$.   
+\section{Infinite tree}
+In the original paper author proposed a persistent version of tree, but it based around global mutable structure. We could also achieve persistency using naive implementation, but in that case we need to copy whole structure which is inefficient. To achieve persistency we need to approach a little bit different. 
+
+For some alphabet $\sigma$ we can simply generate palindromes of length $n$. The number of palindromes of length $n$ will be $g(n, \sigma)$ where 
+$$g(n, \sigma) = \begin{cases}
+\ \sigma^{\frac{n+1}{2}}  & n \ is \ odd\\
+\ \sigma^{\frac{n}{2}}   & n \ is \ even
+\end{cases}$$
+ That infinite tree will represent all possible palindromes and their dependencies. So the number nodes of infinite tree for fixed alphabet will be $\sum_{n=1}^{\infty} g(n, \sigma)$. Here where haskell's lazy evaluation will come in handy. We need to calculate only certain subtree from that tree and it will use $O(n)$ memory. 
+\begin{figure}[H]
+  \centering
+     \includegraphics[width=0.4\linewidth]{unary.png}
+ \caption{Infinite tree over unary alphabet}
+\end{figure}
+\begin{figure}[H]
+  \centering
+     \includegraphics[width=\linewidth]{binary.png}
+ \caption{Infinite tree over binary alphabet}
+\end{figure}
