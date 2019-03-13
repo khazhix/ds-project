@@ -35,14 +35,14 @@ All found palindromes are added to the a tree. Max palindrome suffix of merged t
 
 Another paper from Rubichik \cite{rubinchik2016number} showed that random word of length $n$ contains, on expectation, $\Theta(\sqrt{n})$ distinct palindromic factors. So if length of first string is $n$ and length of second is $m$, on expectation, their concatenation gives us $\Theta(\sqrt{n + m})$ palindromes. From that we exclude palindromes that already processed separately. Since max palindrome suffix and prefix can be new palindromes from concatenation we can update them both at $O(\sqrt{n + m})$.   
 \section{Infinite tree}
-In the original paper author proposed a persistent version of tree, but it based around global mutable structure. We could also achieve persistency using naive implementation, but in that case we need to copy whole structure which is inefficient. To achieve persistency we need to approach a little bit different. 
+In the original paper author proposed a persistent version of tree, but it based around global mutable structure. We could also achieve persistency using naive implementation, but in that case we need to copy whole structure since there are cyclic dependencies, that is inefficient. To achieve persistency we need to approach a little bit different. 
 
 For some alphabet $\sigma$ we can simply generate palindromes of length $n$. The number of palindromes of length $n$ will be $g(n, \sigma)$ where 
 $$g(n, \sigma) = \begin{cases}
 \ \sigma^{\frac{n+1}{2}}  & n \ is \ odd\\
 \ \sigma^{\frac{n}{2}}   & n \ is \ even
 \end{cases}$$
- That infinite tree will represent all possible palindromes and their dependencies. So the number nodes of infinite tree for fixed alphabet will be $\sum_{n=1}^{\infty} g(n, \sigma)$. Here where haskell's lazy evaluation will come in handy. We need to calculate only certain subtree from that tree and it will use $O(n)$ memory. 
+ That infinite tree will represent all possible palindromes and their dependencies. That tree, in fact, is variation of joint eertree proposed in original paper. So the number nodes of infinite tree for fixed alphabet will be $\sum_{n=1}^{\infty} g(n, \sigma)$. Here where haskell's lazy evaluation will come in handy. We need to calculate only certain subtree from that tree and it will use $O(n)$ memory. 
 \begin{figure}[H]
   \centering
      \includegraphics[width=0.4\linewidth]{unary.png}
