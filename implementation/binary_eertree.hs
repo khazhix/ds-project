@@ -60,10 +60,20 @@ candidates (c:suff) = (c:suff) : (candidates suff)
 
 maxSuff :: Eq a => [a] -> [a]
 maxSuff [] = []
-maxSuff (c:s) = head (filter isPalindrome (candidates s))
+maxSuff (_:s) = head (filter isPalindrome (candidates s)) 
 
 nodeByValue :: [Char] -> Node Char
-nodeByValue a = head (filter (\n -> value n == a) allNodes)
+nodeByValue suff
+    | length suff `mod` 2 == 0 = nodeByPath half evenNode
+    | otherwise                = nodeByPath half oddNode
+    where
+        half = drop (length suff `div` 2) suff
+
+nodeByPath :: [Char] -> Node Char -> Node Char
+nodeByPath [] start  = start
+nodeByPath (c:s) start = nodeByPath s nextPoint 
+    where
+        nextPoint = snd (head (filter (\x -> fst x == c) (edge start)))
 
 createNode :: Node Char -> Char -> (Char, Node Char)
 createNode node c = (c, newNode)
