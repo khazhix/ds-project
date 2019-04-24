@@ -1,0 +1,25 @@
+\section{Abstraction from alphabet}
+Let's start from example of some alphabet denoted by $\sigma_1$ 
+$$\sigma_1 = [a, b, c, d, e, f, g]$$
+
+To represent a symbol from that alphabet we can convert it to number representing its position in that alphabet. Simply, mapping alphabet to natural number. We will get
+$$\sigma_{num1} = [0, 1, 2, 3, 4, 5, 6]$$
+
+And for alphabet $\sigma_2$
+$$\sigma_2 = [A, B, C, D, E, F, G]$$
+
+The result will be the same
+$$\sigma_{num2} = [0, 1, 2, 3, 4, 5, 6]$$
+
+In fact that list can be simply generated given the length of alphabet.
+Lengths of alphabets $\sigma_1 and \sigma_2$ are same, in general the tree will be same structurally. So all data types are parametrized by length of alphabet instead of alphabet. If wanted, results from tree can be easily mapped back, for example, to human-readable palindromes.
+In implementation data type \textit{Symbol} represents symbol in the alphabet.
+
+\section{Infinite tree}
+Data type \textit{Node} corresponds to a palindrome in the alphabet. From any node we can build tree of palindromes and get access to \textit{maxPrefixes/maxSuffixes}. From empty nodes we can derive "whole" infinite tree: we can observe all possible palindromes for any alphabet.
+
+\section{String representation based on infinite tree}
+Data type \textit{EERTREE} represents palindromic tree for some symbol sequence. In fact it is directLink version of original Rubinchik's eertree \cite{RUBINCHIK2018249}. To represent some palindrome in that sequence we store node corresponding that palindrome in infinite tree. Basic operations contain addition a symbol and removing symbol from top.
+
+\section{Double ended tree}
+Data type \textit{Mergeable} represents palindromic tree for some symbol sequence but with information for both suffixes and prefixes to allow merge operation. In fact it is represented as two \textit{EERTREEs}, one for prefixes and suffixes. Basic operations contain addition a symbol and removing symbol from top for any side of tree. Also merging of two trees is possible.  
