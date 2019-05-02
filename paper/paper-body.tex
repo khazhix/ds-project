@@ -1,0 +1,186 @@
+\section{Introduction}
+
+A palindrome is a string that reads the same both ways.
+Palindromic patterns appear in many research areas, from
+formal language theory to molecular biology.
+
+There are a lot of papers introducing algorithms and data structures
+to facilitate different problems that involve palindromes.
+One such data structure is EERTREE, a recently described
+linear-sized palindromic tree introduced by Rubinchik \cite{RUBINCHIK2018249}.
+
+In this project we aim to design at least one purely functional and
+fully persistent version of a palindromic tree, implement it
+in Haskell programming language and compare it
+with other existing solutions. We are going to start with
+a naive implementation and gradually arrive at an efficient
+version, relying on some of the techniques described by
+Okasaki \cite{Okasaki1998} for designing purely functional data structures.
+
+We hope that purely functional variations will prove valuable
+for some divide-and-conquer approaches to palindromic analysis.
+We also believe that a fully persistent version might be useful
+for comparative analysis of closely-related strings
+(such as RNA string mutations).
+
+Compared to earlier work, our new contributions are these:
+
+\begin{itemize}
+\item We introduce an efficient purely functional version of palindromic tree,
+  and provide an implementation in Haskell, a non-strict, purely-functional
+  programming language; we also prove that although adding symbols is $O(\log{}n)$ worst case, it is $\Theta(1)$ on average.
+\item We provide a variation of that data structure that is more
+  friendly to garbage collection, and demonstrate its efficiency
+  by counting rich strings of length from $1$ to $n$ in $O(n)$ memory;
+\item We design a double-ended variation with new $prepend$
+  and $merge$ operations, and show that $merge$ can be implemented
+  with $O(\sqrt{n})$ time and space on average;
+\end{itemize}
+
+\section{Problem: palindromic analysis}
+
+\emph{Here we should describe the problem that we are trying to solve.}
+
+\section{Palindromic tree}
+
+\subsection{Naïve palindromic tree}
+
+\subsection{Infinite palindromic tree}
+
+\subsection{First applications}
+
+\section{Memory efficiency}
+
+\subsection{Counting rich strings}
+
+\section{Double-ended palindromic tree}
+
+\subsection{Prepending symbols}
+
+\emph{Here we mention that prefixes and suffixes
+in palindromes are the same, so we adjust data structure
+to keep track of both without much changes and no
+additional asymptotic complexity.}
+
+\subsection{Merging palindromic trees}
+
+\emph{Here describe an algorithm for efficient merge.}
+
+\begin{lemma}
+Set of palindromes for $S_1 + S_2$ is a union of
+palindrome sets for $S_1$, $S_2$ and some new palindromes
+that appear at the catenation point. These new palindromes
+form consecutive descendants of palindromic suffixes of $S_1$
+or palindromic prefixes of $S_2$.
+\end{lemma}
+\begin{proof}
+  \emph{To be done by Timur Khazhiev.}
+\end{proof}
+
+\begin{lemma}
+There is an algorithm that implements $merge$ in $\Theta(K)$,
+where $K$ is the number of new palindromes in $S_1 + S_2$
+compared to palindromes of $S_1$ and $S_2$ taken separately.
+\end{lemma}
+\begin{proof}
+  \emph{To be done by Timur Khazhiev.}
+\end{proof}
+
+\begin{theorem}
+$merge$ is $O(min(N, M, \sqrt{N+M}))$ on average
+and $O(min(N, M))$ worst case, where $N$, $M$
+are length of input strings.
+\end{theorem}
+\begin{proof}
+  \emph{To be done by Timur Khazhiev.}
+\end{proof}
+
+\begin{proposition}
+On average are $\Theta(1)$ new palindromes with different
+centers after $merge$.
+\end{proposition}
+\begin{proof}
+  \emph{To be done.}
+\end{proof}
+
+\begin{proposition}
+It is possible to find all largest new palindromes with different
+centers after $merge$ in $O(\log{} n + \log{} m)$ on average.
+\end{proposition}
+\begin{proof}
+  \emph{To be done.}
+\end{proof}
+
+\section{Complexity Analysis}
+
+Working with maximum palindromic suffixes and prefixes
+is central to most operations with palindromic trees.
+So to understand complexities of these operations we
+study length of such suffixes and prefixes first.
+
+\begin{lemma}
+\label{lemma-palindrome-prob}
+  A random string of length $n$ is a palindrome with probability $\sigma^{- \lfloor\frac{n}{2}\rfloor}$.
+\end{lemma}
+\begin{proof}
+  For a random string to be a palindrome its first $\lfloor\frac{n}{2}\rfloor$
+  symbols must match symbols from the right half exactly, leaving only
+  $1$ valid candidate out of $\sigma^{\lfloor\frac{n}{2}\rfloor}$.
+\end{proof}
+
+\begin{theorem}
+  Average length of the maximum palindromic suffix
+  of a random string of length $n$ is $\Theta(1)$
+  for alphabets of size $\sigma \ge 2$.
+\end{theorem}
+\begin{proof}
+  Let $L_{avg}(n)$ be the average length of the maximum palindromic suffix
+  of a random string of length $n$.
+  $L_{avg}(n) \ge 0$, so to prove $L_{avg}(n)$ is $\Theta(1)$ we need
+  to find a constant upper bound.
+
+  Let $P_{max}(k, n)$ be the probability that a string of length $n$
+  has maximum palindromic suffix of length $k$.
+  Then $L_{avg}(n)$ can be expressed as a weighted sum:
+  $$
+  L_{avg}(n) = \sum_{k=1}^{n} k \cdot P_{max}(k, n)
+  $$
+  We notice that for a string to have a maximum palindromic suffix
+  of length $k$ it is necessary that last $k$ symbols form a palindrome.
+  Using Lemma~\ref{lemma-palindrome-prob} together with that observation
+  we get an upper bound of $P_{max}(k, n)$:
+  $$
+  P_{max}(k, n) \le \sigma^{- \lfloor\frac{k}{2}\rfloor}
+  $$
+  This allows us to derive an upper bound for $L_{avg}(n)$:
+  \begin{align*}
+    L_{avg}(n)
+      &\le \sum_{k=1}^{n} k \cdot \sigma^{- \lfloor\frac{k}{2}\rfloor}
+       \le \sum_{k=1}^{n} k \cdot \sigma^{- \frac{k-1}{2}}
+       \le \sum_{k=1}^{\infty} k \cdot \sigma^{- \frac{k-1}{2}} \\
+      &= \frac{\sigma}{(\sqrt{\sigma} - 1)^2}
+       = O(1)
+  \end{align*}
+\end{proof}
+
+\begin{corollary}
+  $L_{avg}(n) < 12$ for $\sigma = 2$.
+\end{corollary}
+
+\begin{corollary}
+  $L_{avg}(n) \le 4$ for $\sigma = 4$.
+\end{corollary}
+
+\begin{theorem}
+  Adding a symbol to the end of the eertree of
+  a string of length $n$ is $\Theta(1)$ on average,
+  but $O(\log{}n)$ worst case.
+\end{theorem}
+\begin{proof}
+  \emph{To be done by Timur Khazhiev.}
+\end{proof}
+
+\section{Related and future work}
+
+\section{Conclusion}
+
