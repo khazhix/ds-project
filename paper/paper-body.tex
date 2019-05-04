@@ -40,12 +40,24 @@ Compared to earlier work, our new contributions are these:
 \section{Problem: palindromic analysis}
 
 \emph{Here we should describe the problem that we are trying to solve.}
+Collecting all palindromes for further analysis based on problem.
 
 \section{Palindromic tree}
 
 \subsection{Naïve palindromic tree}
+ Structure contains two tries for odd and even palindromes, current maximum palindromic suffix and sequence before that suffix. To add a new symbol to the tree we generate palindromic suffix candidates for input symbol. If symbol before that suffix and input symbol are same, that means that we found a new palindrome, update max palindromic suffix and add new node to the proper trie. If none of candidates is suitable, symbol simple adds to odd trie after the root. 
 
 \subsection{Infinite palindromic tree}
+
+In the original paper author proposed a persistent version of tree, but it based around global mutable structure. We could also achieve persistency using naive implementation, but in that case we need to copy whole structure since there are cyclic dependencies, that is inefficient. To achieve persistency we need to approach a little bit different. 
+
+For some alphabet $\sigma$ we can simply generate palindromes of length $n$. The number of palindromes of length $n$ will be $g(n, \sigma)$ where 
+$$g(n, \sigma) = \begin{cases}
+\ \sigma^{\frac{n+1}{2}}  & n \ is \ odd\\
+\ \sigma^{\frac{n}{2}}   & n \ is \ even
+\end{cases}$$
+ That infinite tree will represent all possible palindromes and their dependencies. That tree, in fact, is variation of joint eertree proposed in original paper. So the number nodes of infinite tree for fixed alphabet will be $\sum_{n=1}^{\infty} g(n, \sigma)$. Here where haskell's lazy evaluation will come in handy. We need to calculate only certain subtree from that tree and it will use $O(n)$ memory. 
+
 
 \subsection{First applications}
 
@@ -61,10 +73,14 @@ Compared to earlier work, our new contributions are these:
 in palindromes are the same, so we adjust data structure
 to keep track of both without much changes and no
 additional asymptotic complexity.}
+As append works with maxSuffixes, the prepend should work with maxPrefixes.
+Palindrome is symmetric, maximum palindrome suffix of palindrome is maximum palindrome prefix as well. Keeping track of maxPrefix will not have any affect on infinite tree. In main structure we should keep track of maxPrefix as well.
 
 \subsection{Merging palindromic trees}
 
 \emph{Here describe an algorithm for efficient merge.}
+
+The basic idea is to find palindromes which were not in mergeable trees and combine with old nodes. The merge is simply appending/prepending with the stop criteria. If length of processed string of left tree is greater than length of processed string of right then the algorithm starts by adding one-by-one symbol from right tree to left one. If the center of new palindrome went beyond maxPrefix of right tree, that palindrome is not new to the right tree, moreover all further palindromes will not. That is a stop criteria. Then simply add all already found palindromes from right tree. If length of processed string of left tree is less than length of processed string of right then the operations are opposite (prepend to right one, keep track of maxSuffix of left one).
 
 \begin{lemma}
 Set of palindromes for $S_1 + S_2$ is a union of
@@ -74,7 +90,7 @@ form consecutive descendants of palindromic suffixes of $S_1$
 or palindromic prefixes of $S_2$.
 \end{lemma}
 \begin{proof}
-  \emph{To be done by Timur Khazhiev.}
+  Naively merge can be done as appending all symbols from $S_2$ to $S_1$, new palindromes will be build on top of maxSuffixes of some prefix of $S_2 + S_1$.
 \end{proof}
 
 \begin{lemma}
@@ -83,7 +99,7 @@ where $K$ is the number of new palindromes in $S_1 + S_2$
 compared to palindromes of $S_1$ and $S_2$ taken separately.
 \end{lemma}
 \begin{proof}
-  \emph{To be done by Timur Khazhiev.}
+  New palindromes can be collected by trying to expand suffixes of $S_1$ and prefixes of $S_2$.
 \end{proof}
 
 \begin{theorem}
@@ -92,7 +108,7 @@ and $O(min(N, M))$ worst case, where $N$, $M$
 are length of input strings.
 \end{theorem}
 \begin{proof}
-  \emph{To be done by Timur Khazhiev.}
+  Worst case is when palindrome is almost whole concatenated string, thus processing whole of one strings is required. Another paper from Rubichik \cite{rubinchik2016number} showed that random word of length $n$ contains, on expectation, $\Theta(\sqrt{n})$ distinct palindromic factors, so on expectation, concatenation gives us $\Theta(\sqrt{N + M})$ palindromes.
 \end{proof}
 
 \begin{proposition}
@@ -100,7 +116,7 @@ On average are $\Theta(1)$ new palindromes with different
 centers after $merge$.
 \end{proposition}
 \begin{proof}
-  \emph{To be done.}
+  Length of suffixes (and prefixes) is constant on average, as new palindromes are based on suffixes and prefixes (suffixes and prefixes are basically the centres) their amount is also constant.
 \end{proof}
 
 \begin{proposition}
