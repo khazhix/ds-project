@@ -28,18 +28,38 @@ Compared to earlier work, our new contributions are these:
 \begin{itemize}
 \item We introduce an efficient purely functional version of palindromic tree,
   and provide an implementation in Haskell, a non-strict, purely-functional
-  programming language; we also prove that although adding symbols is $O(\log{}n)$ worst case, it is $\Theta(1)$ on average.
+  programming language; we also prove that although adding symbols is $\mathcal{O}(\log{}n)$ worst case, it is $\Theta(1)$ on average.
 \item We provide a variation of that data structure that is more
   friendly to garbage collection, and demonstrate its efficiency
-  by counting rich strings of length from $1$ to $n$ in $O(n)$ memory;
+  by counting rich strings of length from $1$ to $n$ in $\mathcal{O}(n)$ memory;
 \item We design a double-ended variation with new $prepend$
   and $merge$ operations, and show that $merge$ can be implemented
-  with $O(\sqrt{n})$ time and space on average;
+  with $\mathcal{O}(1)$ time and space on average;
 \end{itemize}
 
-\section{Problem: palindromic analysis}
+\section{Finding palindromes}
+
+Many of the problems that involve palindromes rely essentially on finding
+all palindromes in a given sequence, possibly keeping track of some extra information
+(such as number and indices of occurrences).
+
+To the best of our knowledge state of the art for this are Manacher's algorithm
+and Rubinchik's EERTREE. Both allow processing string in $\mathcal{O}(n)$ and
 
 \emph{Here we should describe the problem that we are trying to solve.}
+
+Let $Pal(S)$ be the set of all occurrences of all
+palindromes in a string $S$:
+$$
+Pal(S) = \{ \langle p, i \rangle | S_{i..j} = p, isPalindrome(p) \}
+$$
+
+Note that by storing a palindrome occurrence together with its index
+makes it unique (for a given string) and allows us to perform further
+analysis. For instance, we can compute total number of occurrences
+for each palindrome and find a refren-palindrome.
+
+\ldots
 
 \section{Palindromic tree}
 
@@ -55,60 +75,136 @@ Compared to earlier work, our new contributions are these:
 
 \section{Double-ended palindromic tree}
 
-\subsection{Prepending symbols}
+\subsection{Appending symbols}
 
 \emph{Here we mention that prefixes and suffixes
 in palindromes are the same, so we adjust data structure
 to keep track of both without much changes and no
 additional asymptotic complexity.}
 
-\subsection{Merging palindromic trees}
+\subsection{Merging}
 
-\emph{Here describe an algorithm for efficient merge.}
+As has been shown by Rubinchik and Manacher, it is possible
+to process a string in linear time. Above we have shown that
+a similar result can be achieved in a purely functional setting.
+But all mentioned approaches are inherently sequential and
+do not allow for an obvious parallelisation to speed up processing
+large strings.
+
+Our idea and, perhaps, main contribution of this paper is
+design of a merge operation that allows
+us to process two strings separately and combine results
+efficiently.
+
+$$
+merge(S_1, S_2) = Pals(S_1 + S_2)
+$$
+
+The idea behind implementation of merge is very simple:
+we append (or prepend) symbols from one string to another
+until we know we will not encounter any new palindromes.
+
+To arrive at this implementation and prove its correctness
+we need first to formalise a few observations.
+
+We define $NewPals(S_1, S_2)$ to be the set of
+new palindrome occurences, formed after catenation of $S_1$ and $S_2$:
+$$
+NewPals(S_1, S_2) = Pals(S_1 + S_2) - Pals(S_1) - Pals(S_2)
+$$
+
+First observation is trivial,
+but lets us focus only on the important part of the strings.
 
 \begin{lemma}
-Set of palindromes for $S_1 + S_2$ is a union of
-palindrome sets for $S_1$, $S_2$ and some new palindromes
-that appear at the catenation point. These new palindromes
-form consecutive descendants of palindromic suffixes of $S_1$
-or palindromic prefixes of $S_2$.
+\label{lemma-newpals-cover}
+  For any two strings $S_1$ and $S_2$
+  every new palindrome occurence
+  $\langle p, i \rangle \in NewPals(S_1, S_2)$
+  will always cover the catenation point:
+  $$
+  i < \|S_1\| \le \land i + \|p\|
+  $$
 \end{lemma}
 \begin{proof}
   \emph{To be done by Timur Khazhiev.}
 \end{proof}
 
+Lemma \ref{lemma-newpals-cover} hints that we can implement
+merge by prepending (or appending) symbols, but stop prematurely!
+The next lemma helps us figure out when exactly we can stop.
+
 \begin{lemma}
-There is an algorithm that implements $merge$ in $\Theta(K)$,
-where $K$ is the number of new palindromes in $S_1 + S_2$
-compared to palindromes of $S_1$ and $S_2$ taken separately.
+\label{lemma-merge-new-center-interval}
+  For any two strings $S_1$ and $S_2$
+  every new palindrome occurence
+  $\langle p, i \rangle \in NewPals(S_1, S_2)$
+  will have its center
+  between centers of maximum palindrome suffix of $S_1$
+  and maximum palindrome prefix of $S_2$:
+  $$
+  \|S_1\| - \frac{\|\mathit{maxSuff}(S_1)\|}{2} \le
+  i + \frac{\|p\|}{2} \le
+  \|S_1\| + \frac{\|\mathit{maxPref}(S_2)\|}{2}
+  $$
 \end{lemma}
 \begin{proof}
   \emph{To be done by Timur Khazhiev.}
 \end{proof}
+
+Can we stop after new maximum palindome suffix (prefix)
+has its center outside the interval mentioned in Lemma \ref{lemma-merge-new-center-interval}?
+This final lemma helps answer that question:
+
+\begin{lemma}
+\label{lemma-center-move}
+  Let $S'$ be the result of appending (prepending) symbol $c$ to string $S$.
+  Then its maximum palindrome suffix center either stays in place
+  or moves to the right (to the left):
+  $$
+  \|S\| - \frac{\|\mathit{maxSuff}(S)\|}{2} \le \|S'\| - \frac{\|\mathit{maxSuff}(S')\|}{2}
+  $$
+\end{lemma}
+\begin{proof}
+  \emph{To be done by Timur Khazhiev.}
+\end{proof}
+
+Now all ingredients are in place to implement $merge$
+that runs linearly in \textit{(number of suffixes/prefixes we need to update?)}.
 
 \begin{theorem}
-$merge$ is $O(min(N, M, \sqrt{N+M}))$ on average
-and $O(min(N, M))$ worst case, where $N$, $M$
-are length of input strings.
+  There is an algorithm that implements $merge$ in $\Theta(K)$,
+  where $K$ is the maximum index in $S_2$ (correspondingly $S_1$)
+  corresponding to the rightmost (leftmost)
+  of new palindrome occurrences $NewPals(S_1, S_2)$.
+  \emph{This formulation should be rewritten more clearly.}
 \end{theorem}
 \begin{proof}
   \emph{To be done by Timur Khazhiev.}
 \end{proof}
 
-\begin{proposition}
-On average are $\Theta(1)$ new palindromes with different
-centers after $merge$.
-\end{proposition}
+\begin{corollary}
+  There is an algorithm that implements $merge(S_1, S_2)$
+  in $\mathcal{O}(min(\|S_1\|, \|S_2\|))$ worst-case.
+\end{corollary}
 \begin{proof}
-  \emph{To be done.}
+  \emph{To be done by Timur Khazhiev.}
 \end{proof}
 
-\begin{proposition}
-It is possible to find all largest new palindromes with different
-centers after $merge$ in $O(\log{} n + \log{} m)$ on average.
-\end{proposition}
+As we can see, $merge$ can be implemented as simple update
+to the continuous appending (prepending) with virtually no overhead.
+In fact, since our implementation allows for early exit,
+it performs better than mere appending for many strings.
+For example, \ldots
+
+Interestingly, $merge$ will exit early most of the time.
+More precisely, it will exit in constant time on average.
+
+\begin{theorem}
+  $merge$ is $\mathcal{O}(1)$ on average.
+\end{theorem}
 \begin{proof}
-  \emph{To be done.}
+  \emph{To be done by Timur Khazhiev. Hint: use theorem about average length of a maximum palindrome suffix.}
 \end{proof}
 
 \section{Complexity Analysis}
@@ -159,7 +255,7 @@ study length of such suffixes and prefixes first.
        \le \sum_{k=1}^{n} k \cdot \sigma^{- \frac{k-1}{2}}
        \le \sum_{k=1}^{\infty} k \cdot \sigma^{- \frac{k-1}{2}} \\
       &= \frac{\sigma}{(\sqrt{\sigma} - 1)^2}
-       = O(1)
+       = \mathcal{O}(1)
   \end{align*}
 \end{proof}
 
@@ -174,7 +270,7 @@ study length of such suffixes and prefixes first.
 \begin{theorem}
   Adding a symbol to the end of the eertree of
   a string of length $n$ is $\Theta(1)$ on average,
-  but $O(\log{}n)$ worst case.
+  but $\mathcal{O}(\log{}n)$ worst case.
 \end{theorem}
 \begin{proof}
   \emph{To be done by Timur Khazhiev.}
