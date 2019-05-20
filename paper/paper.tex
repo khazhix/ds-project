@@ -1,4 +1,4 @@
-\documentclass[sigconf]{acmart}
+\documentclass[sigplan]{acmart}
 
 \usepackage{booktabs} % For formal tables
 \usepackage{indentfirst}
@@ -16,6 +16,52 @@
 
 \settopmatter{printacmref=false} % Removes citation information below abstract
 \renewcommand\footnotetextcopyrightpermission[1]{} % removes footnote with conference information in first column
+
+\usepackage{xparse,array,booktabs}
+
+\ExplSyntaxOn
+\NewDocumentCommand{\segments}{O{1em}mm}
+ {% #1 = width of cells, #2 = string, #3 = list of underlines
+  \group_begin:
+  \renewcommand{\arraystretch}{0}
+  \fizruk_segments:n { #3 }
+  \begin{tabular}[t]{ @{} *{ \tl_count:n { #2 } }{ w{c}{#1} @{} } }
+  \seq_set_split:Nnn \l__fizruk_string_seq { } { #2 }
+  \seq_use:Nn \l__fizruk_string_seq { & } \\
+  \tl_use:N \l__fizruk_segments_tl
+  \end{tabular}
+  \group_end:
+ }
+
+\seq_new:N \l__fizruk_string_seq
+\seq_new:N \l__fizruk_stages_seq
+\tl_new:N \l__fizruk_segments_tl
+
+\cs_new_protected:Nn \fizruk_segments:n
+ {
+  \tl_clear:N \l__fizruk_segments_tl
+  \seq_set_split:Nnn \l__fizruk_stages_seq { ; } { #1 }
+  \seq_map_function:NN \l__fizruk_stages_seq \__fizruk_segment_row:n
+ }
+
+\cs_new_protected:Nn \__fizruk_segment_row:n
+ {
+  \clist_map_function:nN { #1 } \__fizruk_add_segment:n
+  \tl_put_right:Nn \l__fizruk_segments_tl { \morecmidrules }
+ }
+
+\cs_new_protected:Nn \__fizruk_add_segment:n
+ {
+  \str_if_in:nnTF { #1 } { - }
+   {
+    \tl_put_right:Nn \l__fizruk_segments_tl { \cmidrule(l{2pt}r{2pt}){#1} }
+   }
+   {
+    \tl_put_right:Nn \l__fizruk_segments_tl { \cmidrule(l{2pt}r{2pt}){#1-#1} }
+   }
+ }
+
+\ExplSyntaxOff
 
 \begin{document}
 \title{Purely functional palindromic trees}
@@ -48,7 +94,7 @@
   a double-ended variation with $merge$ operation and
   show that it can be performed in $\mathcal{O}(1)$
   on average, openning door for various optimisations,
-  including fast parallel build of an EERTREE.
+  including fast parallel palindromic analysis.
 \end{abstract}
 
 %

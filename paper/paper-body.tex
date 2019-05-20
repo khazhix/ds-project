@@ -1,40 +1,106 @@
 \section{Introduction}
 
-A palindrome is a string that reads the same both ways.
-Palindromic patterns appear in many research areas, from
+A string $S$ is a \emph{palindrome} if it is equal
+to its reverse: $S = S^{-1}$. For instance,
+$racecar$ is a palindrome, but $runner$ is not since
+$runner^{-1} = rennur$ and $runner \ne rennur$.
+
+Palindromes arise in many research areas, from
 formal language theory to molecular biology.
+A lot of solutions to practical problems (such as \ldots)
+rely fundamentally on some method of efficiently
+finding all palindromes in a given string.
 
-There are a lot of papers introducing algorithms and data structures
-to facilitate different problems that involve palindromes.
-One such data structure is EERTREE, a recently described
-linear-sized palindromic tree introduced by Rubinchik \cite{RUBINCHIK2018249}.
+We will visualise substrings using underlines. For instance, we
+can visualise all palindromes of length $2$ in $S = 110100110$ like this:
+$\underline{1\,1}\,0\,1\,\underline{0\,0}\,\underline{1\,1}\,0$. By layering these lines we can
+compactly visualise all palindromes in $S$:
 
-In this project we aim to design at least one purely functional and
-fully persistent version of a palindromic tree, implement it
-in Haskell programming language and compare it
-with other existing solutions. We are going to start with
-a naive implementation and gradually arrive at an efficient
-version, relying on some of the techniques described by
-Okasaki \cite{Okasaki1998} for designing purely functional data structures.
+\[
+S=\segments{110100110}{
+    1-2,3-5,6-9;
+    1,2-4,5-6,7-8,9;
+    2,3,4-7,8;
+    4,5,6,7;
+  }
+\]
 
-We hope that purely functional variations will prove valuable
-for some divide-and-conquer approaches to palindromic analysis.
-We also believe that a fully persistent version might be useful
-for comparative analysis of closely-related strings
-(such as RNA string mutations).
+While there can be up to $\mathcal{O}(n^2)$ different occurrences
+of palindromic substrings, it is known \cite{} that there is
+at most $n$ different palindromic substrings in a string of length $n$.
+For instance, $S = 110100110$ has only 8 distinct palindromes\footnote{
+subpalindromes of $110100110$ are $1$, $11$, $0$, $101$, $010$, $00$, $1001$ and $0110$.
+}.
+
+This property suggests existence of linear-time algorithms for
+palindromic analysis of strings. Indeed, Manacher's algorithm \cite{}
+is well-known for finding the longest palindromic substring in linear time.
+Rubinchik's \emph{palindromic tree} (or \emph{eertree}) \cite{RUBINCHIK2018249}
+is a data structure that keeps track of all distinct palindromes
+in a string and can be built online in linear time.
+
+The latter has a big advantage in that it can be applied to
+many problems with slight modifications as Rubinchik shows in
+his paper.
+
+
+
+
+Manacher's algorithm \cite{} is well-known for
+finding the longest palindromic substring in linear time.
+It relies on a simple fact that the longest palindromic substring
+will also be the maximum palindromic suffix for some prefix of the string
+as well as a clever way of finding the next maximum suffix in constant time.
+We can visualise maximum palindromic suffixes for every prefix of a string
+(longest palindromic substring is visualised with a bold line):
+
+\[
+%  \begin{tabular}[t]{ @{} *{ \tl_count:n { #2 } }{ w{c}{#1} @{} } }
+  \begin{tabular}[t]{ @{} *{10}{ w{c}{1em} @{} } }
+    1&0&1&0&0&1&0&0 \\
+    \cmidrule(l{2pt}r{2pt}){1-1} \morecmidrules
+    \cmidrule(l{2pt}r{2pt}){2-2} \morecmidrules
+    \cmidrule(l{2pt}r{2pt}){1-3} \morecmidrules
+    \cmidrule(l{2pt}r{2pt}){2-4} \morecmidrules
+    \cmidrule(l{2pt}r{2pt}){4-5} \morecmidrules
+    \cmidrule(l{2pt}r{2pt}){3-6} \morecmidrules
+    \cmidrule[0.1em](l{2pt}r{2pt}){2-7} \morecmidrules
+    \cmidrule(l{2pt}r{2pt}){4-8}
+  \end{tabular}
+\]
+
+Rubinchik \cite{RUBINCHIK2018249} came up with a
+\emph{palindromic tree} (or \emph{EERTREE}) that is based
+on similar ideas and allows to collect all palindromes
+online and also in linear time. The big advantage of
+this data structure is that it can be applied to various
+practical problems with slight modifications as Rubinchik
+shows in his paper.
+
+In his work Rubinchik also introduced a \emph{persistent eertree},
+that allows working with multiple versions of a string
+with little extra cost. His persistent eertree introduces
+a logarithmic slowdown and can be built in $\mathcal{O}(n \log{} n)$ time.
+We should note however that his version is not thread-safe
+and cannot be directly translated to purely functional setting
+as it relies on a global mutable data structure
+(joint eertree for all existing versions).
+
+
 
 Compared to earlier work, our new contributions are these:
 
 \begin{itemize}
 \item We introduce an efficient purely functional version of palindromic tree,
   and provide an implementation in Haskell, a non-strict, purely-functional
-  programming language; we also prove that although adding symbols is $\mathcal{O}(\log{}n)$ worst case, it is $\Theta(1)$ on average.
+  programming language; we also prove that although adding symbols is
+  $\mathcal{O}(\log{}n)$ worst case, it is $\Theta(1)$ on average.
 \item We provide a variation of that data structure that is more
   friendly to garbage collection, and demonstrate its efficiency
-  by counting rich strings of length from $1$ to $n$ in $\mathcal{O}(n)$ memory;
-\item We design a double-ended variation with new $prepend$
-  and $merge$ operations, and show that $merge$ can be implemented
-  with $\mathcal{O}(1)$ time and space on average;
+  by counting rich strings up to length $n$ in $\mathcal{O}(n)$ memory;
+\item We design a double-ended variation with new $merge$ operation,
+  and show that $merge$ can be implemented with $\mathcal{O}(1)$
+  time and space complexity on average.
 \end{itemize}
 
 \section{Finding palindromes}
@@ -44,9 +110,9 @@ all palindromes in a given sequence, possibly keeping track of some extra inform
 (such as number and indices of occurrences).
 
 To the best of our knowledge state of the art for this are Manacher's algorithm
-and Rubinchik's EERTREE. Both allow processing string in $\mathcal{O}(n)$ and
-
-\emph{Here we should describe the problem that we are trying to solve.}
+and Rubinchik's EERTREE. Both allow processing a string in $\mathcal{O}(n)$
+with a difference that Rubinchik's approach allows online processing and is more
+general.
 
 Let $Pal(S)$ be the set of all occurrences of all
 palindromes in a string $S$:
@@ -109,9 +175,9 @@ we need first to formalise a few observations.
 
 We define $NewPals(S_1, S_2)$ to be the set of
 new palindrome occurences, formed after catenation of $S_1$ and $S_2$:
-$$
+\[
 NewPals(S_1, S_2) = Pals(S_1 + S_2) - Pals(S_1) - Pals(S_2)
-$$
+\]
 
 First observation is trivial,
 but lets us focus only on the important part of the strings.
@@ -122,9 +188,9 @@ but lets us focus only on the important part of the strings.
   every new palindrome occurence
   $\langle p, i \rangle \in NewPals(S_1, S_2)$
   will always cover the catenation point:
-  $$
-  i < \|S_1\| \le \land i + \|p\|
-  $$
+  \[
+  i < \|S_1\| \le i + \|p\|
+  \]
 \end{lemma}
 \begin{proof}
   \emph{To be done by Timur Khazhiev.}
@@ -142,11 +208,11 @@ The next lemma helps us figure out when exactly we can stop.
   will have its center
   between centers of maximum palindrome suffix of $S_1$
   and maximum palindrome prefix of $S_2$:
-  $$
+  \[
   \|S_1\| - \frac{\|\mathit{maxSuff}(S_1)\|}{2} \le
   i + \frac{\|p\|}{2} \le
   \|S_1\| + \frac{\|\mathit{maxPref}(S_2)\|}{2}
-  $$
+  \]
 \end{lemma}
 \begin{proof}
   \emph{To be done by Timur Khazhiev.}
@@ -161,9 +227,9 @@ This final lemma helps answer that question:
   Let $S'$ be the result of appending (prepending) symbol $c$ to string $S$.
   Then its maximum palindrome suffix center either stays in place
   or moves to the right (to the left):
-  $$
+  \[
   \|S\| - \frac{\|\mathit{maxSuff}(S)\|}{2} \le \|S'\| - \frac{\|\mathit{maxSuff}(S')\|}{2}
-  $$
+  \]
 \end{lemma}
 \begin{proof}
   \emph{To be done by Timur Khazhiev.}
@@ -238,16 +304,16 @@ study length of such suffixes and prefixes first.
   Let $P_{max}(k, n)$ be the probability that a string of length $n$
   has maximum palindromic suffix of length $k$.
   Then $L_{avg}(n)$ can be expressed as a weighted sum:
-  $$
+  \[
   L_{avg}(n) = \sum_{k=1}^{n} k \cdot P_{max}(k, n)
-  $$
+  \]
   We notice that for a string to have a maximum palindromic suffix
   of length $k$ it is necessary that last $k$ symbols form a palindrome.
   Using Lemma~\ref{lemma-palindrome-prob} together with that observation
   we get an upper bound of $P_{max}(k, n)$:
-  $$
+  \[
   P_{max}(k, n) \le \sigma^{- \lfloor\frac{k}{2}\rfloor}
-  $$
+  \]
   This allows us to derive an upper bound for $L_{avg}(n)$:
   \begin{align*}
     L_{avg}(n)
